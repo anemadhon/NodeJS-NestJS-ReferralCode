@@ -14,7 +14,7 @@ export class ReferralService {
       code: payload.code.toUpperCase(),
       type: payload.type.toUpperCase(),
       description: payload.description.toUpperCase(),
-      creatorId: 'user-7GxxtTukpYIeEAkv',
+      createdBy: 'user-YNcYj0r5_jaGBfBl',
       createdAt: unixTimestamp,
       updatedAt: unixTimestamp,
       createdFrom: payload.clientFrom,
@@ -26,16 +26,17 @@ export class ReferralService {
       select: { id: true },
     });
 
-    return { referral };
+    return { message: '', result: referral };
   }
 
   async findAll() {
-    return { referrals: await this.prisma.referrals.findMany() };
+    return { message: '', result: await this.prisma.referrals.findMany() };
   }
 
   async findOne(id: string) {
     return {
-      referral: await this.prisma.referrals.findUnique({ where: { id } }),
+      message: '',
+      result: await this.prisma.referrals.findUnique({ where: { id } }),
     };
   }
 
@@ -49,9 +50,9 @@ export class ReferralService {
       description: payload.description.toUpperCase(),
       updatedAt: unixTimestamp,
       updatedFrom: payload.clientFrom,
-      creatorId: referral.referral.creatorId,
-      createdAt: referral.referral.createdAt,
-      createdFrom: referral.referral.createdFrom,
+      createdBy: referral.result.createdBy,
+      createdAt: referral.result.createdAt,
+      createdFrom: referral.result.createdFrom,
     };
 
     const updatedReferral = await this.prisma.referrals.update({
@@ -60,7 +61,7 @@ export class ReferralService {
       select: { id: true },
     });
 
-    return { updatedReferral };
+    return { message: '', result: updatedReferral };
   }
 
   async remove(id: string) {
@@ -70,6 +71,6 @@ export class ReferralService {
       select: { id: true },
     });
 
-    return deletedReferral;
+    return { message: '', result: deletedReferral };
   }
 }

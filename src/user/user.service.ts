@@ -17,16 +17,12 @@ export class UserService {
 
     const user = await this.prisma.users.create({ data, select: { id: true } });
 
-    return { user };
+    return { message: '', result: user };
   }
 
   async findOne(id: string) {
     const user = await this.prisma.users.findUnique({ where: { id } });
 
-    return {
-      user,
-      unix: Date.now(),
-      datenormal: new Date(Date.now()).toLocaleString(),
-    };
+    return { message: '', result: user };
   }
 }
