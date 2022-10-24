@@ -9,14 +9,16 @@ import {
 } from '@nestjs/common';
 import { ReferralService } from './referral.service';
 import { ReferralDto } from './dto/referral.dto';
+import { ClientFrom } from './decorator/client.decorator';
 
 @Controller('referrals')
 export class ReferralController {
   constructor(private readonly referralService: ReferralService) {}
 
   @Post()
-  create(@Body() body: ReferralDto) {
-    return this.referralService.create(body);
+  create(@ClientFrom() clientFrom: string, @Body() body: ReferralDto) {
+    const payload = { clientFrom, ...body };
+    return this.referralService.create(payload);
   }
 
   @Get()
@@ -30,9 +32,14 @@ export class ReferralController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: ReferralDto) {
+  update(
+    @ClientFrom() clientFrom: string,
+    @Param('id') id: string,
+    @Body() body: ReferralDto,
+  ) {
     const payload = {
       id,
+      clientFrom,
       ...body,
     };
 
