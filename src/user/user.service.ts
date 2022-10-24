@@ -1,19 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
+import * as argon from 'argon2';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
-  create(body: UserDto) {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(body: UserDto) {
     const data = {
       ...body,
       id: `user-${nanoid(16)}`,
+      password: await argon.hash(body.password),
     };
 
-    return { data };
+    const user = await this.prisma.users.create({ data, select: { id: true } });
+
+    return { user };
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    const user = await this.prisma.users.findUnique({ where: { id } });
+
+    return {
+      user,
+      unix: Date.now(),
+      datenormal: new Date(Date.now()).toLocaleString(),
+    };
   }
 }
