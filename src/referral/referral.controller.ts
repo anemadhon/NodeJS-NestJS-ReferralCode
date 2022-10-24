@@ -10,13 +10,13 @@ import {
 import { ReferralService } from './referral.service';
 import { ReferralDto } from './dto/referral.dto';
 
-@Controller('referral')
+@Controller('referrals')
 export class ReferralController {
   constructor(private readonly referralService: ReferralService) {}
 
   @Post()
-  create(@Body() ReferralDto: ReferralDto) {
-    return this.referralService.create(ReferralDto);
+  create(@Body() body: ReferralDto) {
+    return this.referralService.create(body);
   }
 
   @Get()
@@ -26,16 +26,21 @@ export class ReferralController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.referralService.findOne(+id);
+    return this.referralService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() ReferralDto: ReferralDto) {
-    return this.referralService.update(+id, ReferralDto);
+  update(@Param('id') id: string, @Body() body: ReferralDto) {
+    const payload = {
+      id,
+      ...body,
+    };
+
+    return this.referralService.update(payload);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.referralService.remove(+id);
+    return this.referralService.remove(id);
   }
 }
