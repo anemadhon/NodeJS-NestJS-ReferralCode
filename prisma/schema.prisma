@@ -17,7 +17,7 @@ model Users {
     password String
     division String @default("Operational")
 
-    Referrals Referrals[]
+    referrals Referrals[]
 }
 
 model Referrals {
@@ -25,13 +25,13 @@ model Referrals {
     code        String @unique
     type        String
     description String
-    createdBy   String
+    creatorId   String
     createdAt   Int
     updatedAt   Int
     createdFrom String
     updatedFrom String
 
-    creator Users @relation(fields: [createdBy], references: [id])
+    creator Users @relation(fields: [creatorId], references: [id])
 }
 
 model Authentications {
