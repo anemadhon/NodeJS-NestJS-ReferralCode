@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { tryCatchErrorHandling } from 'src/response.filter';
 import { ReferralDto } from './dto/referral.dto';
 
 @Injectable()
@@ -21,27 +22,38 @@ export class ReferralService {
       updatedFrom: payload.clientFrom,
     };
 
-    const referral = await this.prisma.referrals.create({
-      data,
-      select: { id: true },
-    });
+    const referral = await this.prisma.referrals
+      .create({
+        data,
+        select: { id: true },
+      })
+      .catch((error) => tryCatchErrorHandling(error));
 
     return { message: '', result: referral };
   }
 
   async findAll() {
-    return { message: '', result: await this.prisma.referrals.findMany() };
+    return {
+      message: '',
+      result: await this.prisma.referrals
+        .findMany()
+        .catch((error) => tryCatchErrorHandling(error)),
+    };
   }
 
   async findOne(id: string) {
     return {
       message: '',
-      result: await this.prisma.referrals.findUnique({ where: { id } }),
+      result: await this.prisma.referrals
+        .findUnique({ where: { id } })
+        .catch((error) => tryCatchErrorHandling(error)),
     };
   }
 
   async update(payload: { id: string; clientFrom: string } & ReferralDto) {
-    const referral = await this.findOne(payload.id);
+    const referral = await this.findOne(payload.id).catch((error) =>
+      tryCatchErrorHandling(error),
+    );
     const unixTimestamp = Date.now();
     const data = {
       id: `referral-code-${nanoid(16)}`,
@@ -55,21 +67,26 @@ export class ReferralService {
       createdFrom: referral.result.createdFrom,
     };
 
-    const updatedReferral = await this.prisma.referrals.update({
-      where: { id: payload.id },
-      data,
-      select: { id: true },
-    });
+    const updatedReferral = await this.prisma.referrals
+      .update({
+        where: { id: payload.id },
+        data,
+        select: { id: true },
+      })
+      .catch((error) => tryCatchErrorHandling(error));
 
     return { message: '', result: updatedReferral };
   }
 
   async remove(id: string) {
-    const referral = await this.findOne(id);
-    const deletedReferral = await this.prisma.referrals.delete({
-      where: { id },
-      select: { id: true },
-    });
+    await this.findOne(id).catch((error) => tryCatchErrorHandling(error));
+
+    const deletedReferral = await this.prisma.referrals
+      .delete({
+        where: { id },
+        select: { id: true },
+      })
+      .catch((error) => tryCatchErrorHandling(error));
 
     return { message: '', result: deletedReferral };
   }
