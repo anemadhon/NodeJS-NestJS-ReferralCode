@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, ForbiddenException } from '@nestjs/common'
 import { nanoid } from 'nanoid'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { tryCatchErrorHandling } from 'src/response.filter'
@@ -58,7 +58,9 @@ export class ReferralService {
 		)
 
 		if (referral.result.createdBy !== payload.owner) {
-			//
+			throw new ForbiddenException(
+				'ForbiddenException - You are not allowed to this action'
+			)
 		}
 
 		const unixTimestamp = Date.now()
@@ -91,7 +93,9 @@ export class ReferralService {
 		)
 
 		if (referral.result.createdBy !== payload.owner) {
-			//
+			throw new ForbiddenException(
+				'ForbiddenException - You are not allowed to this action'
+			)
 		}
 
 		const deletedReferral = await this.prisma.referrals

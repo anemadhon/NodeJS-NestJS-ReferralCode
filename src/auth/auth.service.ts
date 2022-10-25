@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common'
+import {
+	Injectable,
+	UnauthorizedException,
+	InternalServerErrorException,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { AuthDto } from './dto/auth.dto'
 import * as argon from 'argon2'
 import { JwtService } from '@nestjs/jwt'
+import { tryCatchErrorHandling } from 'src/response.filter'
 
 @Injectable()
 export class AuthService {
@@ -13,16 +18,22 @@ export class AuthService {
 		private readonly config: ConfigService
 	) {}
 	async create({ username, password }: AuthDto) {
-		const user = await this.prisma.users.findFirst({ where: { username } })
+		const user = await this.prisma.users
+			.findFirst({ where: { username } })
+			.catch(error => tryCatchErrorHandling(error))
 
 		if (!user) {
-			return {}
+			throw new UnauthorizedException(
+				'UnauthorizedException - Credentials not matched'
+			)
 		}
 
 		const isPasswordMatches = await argon.verify(user.password, password)
 
 		if (!isPasswordMatches) {
-			return {}
+			throw new UnauthorizedException(
+				'UnauthorizedException - Credentials not matched'
+			)
 		}
 
 		const token = {
@@ -40,7 +51,7 @@ export class AuthService {
 		const addedToken = await this.addToken(token.refreshToken)
 
 		if (!addedToken.token) {
-			return {}
+			throw new InternalServerErrorException('Internal Server Error')
 		}
 
 		return { message: '', result: token }
@@ -58,9 +69,11 @@ export class AuthService {
 	}
 
 	private async addToken(token: string) {
-		return await this.prisma.authentications.create({
-			data: { token },
-			select: { token: true },
-		})
+		return await this.prisma.authentications
+			.create({
+				data: { token },
+				select: { token: true },
+			})
+			.catch(error => tryCatchErrorHandling(error))
 	}
 }

@@ -7,7 +7,6 @@ import {
 	ApiOkResponse,
 	ApiInternalServerErrorResponse,
 	ApiBadRequestResponse,
-	ApiForbiddenResponse,
 	ApiNoContentResponse,
 	ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
@@ -22,7 +21,7 @@ export class AuthController {
 	@ApiBadRequestResponse({
 		description: `when the request wrong or not passed validation`,
 	})
-	@ApiForbiddenResponse({ description: `when credentials not matched` })
+	@ApiUnauthorizedResponse({ description: `when credentials not matched` })
 	@HttpCode(200)
 	@Post('login')
 	create(@Body() payload: AuthDto) {
