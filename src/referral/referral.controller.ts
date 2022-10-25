@@ -10,8 +10,10 @@ import {
 import { ReferralService } from './referral.service';
 import { ReferralDto } from './dto/referral.dto';
 import { ClientFrom } from './decorator/client.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('referrals')
+@ApiTags('referrals')
+@Controller({ path: 'referrals', version: '1' })
 export class ReferralController {
   constructor(private readonly referralService: ReferralService) {}
 
