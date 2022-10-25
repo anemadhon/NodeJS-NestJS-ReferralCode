@@ -13,6 +13,9 @@ $ cp .env.example .env
 # prisma migrate
 $ npx prisma migrate dev
 
+# launch prisma studio
+$ npx prisma studio
+
 # prisma seed
 $ npm prisma:seed
 
