@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { AuthDto } from './dto/auth.dto'
 import * as argon from 'argon2'
@@ -8,7 +9,8 @@ import { JwtService } from '@nestjs/jwt'
 export class AuthService {
 	constructor(
 		private readonly prisma: PrismaService,
-		private readonly jwt: JwtService
+		private readonly jwt: JwtService,
+		private readonly config: ConfigService
 	) {}
 	async create({ username, password }: AuthDto) {
 		const user = await this.prisma.users.findFirst({ where: { username } })
@@ -25,17 +27,17 @@ export class AuthService {
 
 		const token = {
 			type: 'Bearer',
-			accessToken: this.generateToken(user.id, {
-				expiresIn: '2m',
-				secret: 'access',
+			accessToken: await this.generateToken(user.id, {
+				expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRE'),
+				secret: this.config.get<string>('JWT_ACCESS_SECRET'),
 			}),
-			refreshToken: this.generateToken(user.id, {
-				expiresIn: '2m',
-				secret: 'refresh',
+			refreshToken: await this.generateToken(user.id, {
+				expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRE'),
+				secret: this.config.get<string>('JWT_REFRESH_SECRET'),
 			}),
 		}
 
-		const addedToken = await this.addToken(await token.refreshToken)
+		const addedToken = await this.addToken(token.refreshToken)
 
 		if (!addedToken.token) {
 			return {}
