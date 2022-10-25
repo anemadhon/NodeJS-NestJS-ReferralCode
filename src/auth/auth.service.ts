@@ -9,6 +9,7 @@ import { AuthDto } from './dto/auth.dto'
 import * as argon from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { tryCatchErrorHandling } from 'src/response.filter'
+import { LogoutDto } from './dto/logout.dto'
 
 @Injectable()
 export class AuthService {
@@ -57,7 +58,17 @@ export class AuthService {
 		return { message: '', result: token }
 	}
 
-	async logout() {
+	async logout(payload: LogoutDto) {
+		const verifyToken = await this.verifyToken(payload.refreshToken)
+
+		if (!verifyToken.token) {
+			throw new UnauthorizedException(
+				'UnauthorizedException - Please login to Continue'
+			)
+		}
+
+		await this.deleteToken(payload.refreshToken)
+
 		return { message: '', result: '' }
 	}
 
@@ -74,6 +85,18 @@ export class AuthService {
 				data: { token },
 				select: { token: true },
 			})
+			.catch(error => tryCatchErrorHandling(error))
+	}
+
+	private async verifyToken(token: string) {
+		return await this.prisma.authentications
+			.findFirst({ where: { token } })
+			.catch(error => tryCatchErrorHandling(error))
+	}
+
+	private async deleteToken(token: string) {
+		return await this.prisma.authentications
+			.delete({ where: { token }, select: { token: true } })
 			.catch(error => tryCatchErrorHandling(error))
 	}
 }

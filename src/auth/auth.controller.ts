@@ -10,6 +10,7 @@ import {
 	ApiNoContentResponse,
 	ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
+import { LogoutDto } from './dto/logout.dto'
 
 @ApiInternalServerErrorResponse({ description: `when server goes wrong` })
 @ApiTags('auth')
@@ -33,7 +34,7 @@ export class AuthController {
 	@ApiBearerAuth()
 	@HttpCode(204)
 	@Post('logout')
-	logout() {
-		return this.authService.logout()
+	logout(@Body() payload: LogoutDto) {
+		return this.authService.logout(payload)
 	}
 }
