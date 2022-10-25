@@ -1,60 +1,60 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto/auth.dto';
-import * as argon from 'argon2';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from '@nestjs/common'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { AuthDto } from './dto/auth.dto'
+import * as argon from 'argon2'
+import { JwtService } from '@nestjs/jwt'
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwt: JwtService,
-  ) {}
-  async create({ username, password }: AuthDto) {
-    const user = await this.prisma.users.findFirst({ where: { username } });
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly jwt: JwtService
+	) {}
+	async create({ username, password }: AuthDto) {
+		const user = await this.prisma.users.findFirst({ where: { username } })
 
-    if (!user) {
-      return {};
-    }
+		if (!user) {
+			return {}
+		}
 
-    const isPasswordMatches = await argon.verify(user.password, password);
+		const isPasswordMatches = await argon.verify(user.password, password)
 
-    if (!isPasswordMatches) {
-      return {};
-    }
+		if (!isPasswordMatches) {
+			return {}
+		}
 
-    const token = {
-      type: 'Bearer',
-      accessToken: this.generateToken(user.id, {
-        expiresIn: '2m',
-        secret: 'access',
-      }),
-      refreshToken: this.generateToken(user.id, {
-        expiresIn: '2m',
-        secret: 'refresh',
-      }),
-    };
+		const token = {
+			type: 'Bearer',
+			accessToken: this.generateToken(user.id, {
+				expiresIn: '2m',
+				secret: 'access',
+			}),
+			refreshToken: this.generateToken(user.id, {
+				expiresIn: '2m',
+				secret: 'refresh',
+			}),
+		}
 
-    const addedToken = await this.addToken(await token.refreshToken);
+		const addedToken = await this.addToken(await token.refreshToken)
 
-    if (!addedToken.token) {
-      return {};
-    }
+		if (!addedToken.token) {
+			return {}
+		}
 
-    return { message: '', result: token };
-  }
+		return { message: '', result: token }
+	}
 
-  private generateToken(
-    id: string,
-    options: { expiresIn: string; secret: string },
-  ): Promise<string> {
-    return this.jwt.signAsync({ sub: id }, options);
-  }
+	private generateToken(
+		id: string,
+		options: { expiresIn: string; secret: string }
+	): Promise<string> {
+		return this.jwt.signAsync({ sub: id }, options)
+	}
 
-  private async addToken(token: string) {
-    return await this.prisma.authentications.create({
-      data: { token },
-      select: { token: true },
-    });
-  }
+	private async addToken(token: string) {
+		return await this.prisma.authentications.create({
+			data: { token },
+			select: { token: true },
+		})
+	}
 }

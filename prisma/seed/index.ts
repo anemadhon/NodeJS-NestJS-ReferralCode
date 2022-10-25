@@ -1,17 +1,17 @@
-import { PrismaClient } from '@prisma/client';
-import { referralSeeder } from './referral.seed';
-import { userSeeder } from './user.seed';
+import { PrismaClient } from '@prisma/client'
+import { referralSeeder } from './referral.seed'
+import { userSeeder } from './user.seed'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 Promise.all([userSeeder(), referralSeeder()])
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (error) => {
-    console.log(error);
+	.then(async () => {
+		await prisma.$disconnect()
+	})
+	.catch(async error => {
+		console.log(error)
 
-    await prisma.$disconnect();
+		await prisma.$disconnect()
 
-    process.exit(1);
-  });
+		process.exit(1)
+	})

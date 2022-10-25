@@ -1,12 +1,12 @@
-import { IsString } from 'class-validator';
+import { IsString } from 'class-validator'
 
 export class ReferralDto {
-  @IsString()
-  code: string;
+	@IsString()
+	code: string
 
-  @IsString()
-  type: string;
+	@IsString()
+	type: string
 
-  @IsString()
-  description: string;
+	@IsString()
+	description: string
 }
