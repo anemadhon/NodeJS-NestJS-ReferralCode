@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common'
 import { UserService } from './user.service'
 import { UserDto } from './dto/user.dto'
 import {
@@ -11,6 +11,7 @@ import {
 	ApiInternalServerErrorResponse,
 } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
+import { Me } from 'src/auth/decorator/authenticated.decorator'
 
 @ApiInternalServerErrorResponse({ description: `when server goes wrong` })
 @ApiTags('users')
@@ -32,7 +33,7 @@ export class UserController {
 	@ApiBearerAuth()
 	@UseGuards(AuthGuard('jwt'))
 	@Get('me')
-	findOne(@Param('id') id: string) {
+	findOne(@Me() id: string) {
 		return this.userService.findOne(id)
 	}
 }

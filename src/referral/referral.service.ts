@@ -8,14 +8,14 @@ import { ReferralDto } from './dto/referral.dto'
 export class ReferralService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async create(payload: { clientFrom: string } & ReferralDto) {
+	async create(payload: { clientFrom: string; id: string } & ReferralDto) {
 		const unixTimestamp = Date.now()
 		const data = {
 			id: `referral-code-${nanoid(16)}`,
 			code: payload.code.toUpperCase(),
 			type: payload.type.toUpperCase(),
 			description: payload.description.toUpperCase(),
-			createdBy: 'user-YNcYj0r5_jaGBfBl',
+			createdBy: payload.id,
 			createdAt: unixTimestamp,
 			updatedAt: unixTimestamp,
 			createdFrom: payload.clientFrom,
@@ -50,10 +50,17 @@ export class ReferralService {
 		}
 	}
 
-	async update(payload: { id: string; clientFrom: string } & ReferralDto) {
+	async update(
+		payload: { id: string; owner: string; clientFrom: string } & ReferralDto
+	) {
 		const referral = await this.findOne(payload.id).catch(error =>
 			tryCatchErrorHandling(error)
 		)
+
+		if (referral.result.createdBy !== payload.owner) {
+			//
+		}
+
 		const unixTimestamp = Date.now()
 		const data = {
 			id: `referral-code-${nanoid(16)}`,
@@ -62,7 +69,7 @@ export class ReferralService {
 			description: payload.description.toUpperCase(),
 			updatedAt: unixTimestamp,
 			updatedFrom: payload.clientFrom,
-			createdBy: referral.result.createdBy,
+			createdBy: payload.owner,
 			createdAt: referral.result.createdAt,
 			createdFrom: referral.result.createdFrom,
 		}
@@ -78,12 +85,18 @@ export class ReferralService {
 		return { message: '', result: updatedReferral }
 	}
 
-	async remove(id: string) {
-		await this.findOne(id).catch(error => tryCatchErrorHandling(error))
+	async remove(payload: { id: string; owner: string }) {
+		const referral = await this.findOne(payload.id).catch(error =>
+			tryCatchErrorHandling(error)
+		)
+
+		if (referral.result.createdBy !== payload.owner) {
+			//
+		}
 
 		const deletedReferral = await this.prisma.referrals
 			.delete({
-				where: { id },
+				where: { id: payload.id },
 				select: { id: true },
 			})
 			.catch(error => tryCatchErrorHandling(error))

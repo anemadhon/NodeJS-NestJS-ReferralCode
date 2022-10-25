@@ -6,6 +6,7 @@ import {
 	Patch,
 	Param,
 	Delete,
+	UseGuards,
 } from '@nestjs/common'
 import { ReferralService } from './referral.service'
 import { ReferralDto } from './dto/referral.dto'
@@ -22,6 +23,8 @@ import {
 	ApiUnauthorizedResponse,
 	ApiInternalServerErrorResponse,
 } from '@nestjs/swagger'
+import { AuthGuard } from '@nestjs/passport'
+import { Me } from 'src/auth/decorator/authenticated.decorator'
 
 @ApiInternalServerErrorResponse({ description: `when server goes wrong` })
 @ApiTags('referrals')
@@ -37,9 +40,14 @@ export class ReferralController {
 	})
 	@ApiUnauthorizedResponse({ description: `when user unauthenticated` })
 	@ApiBearerAuth()
+	@UseGuards(AuthGuard('jwt'))
 	@Post()
-	create(@ClientFrom() clientFrom: string, @Body() body: ReferralDto) {
-		const payload = { clientFrom, ...body }
+	create(
+		@ClientFrom() clientFrom: string,
+		@Me() id: string,
+		@Body() body: ReferralDto
+	) {
+		const payload = { id, clientFrom, ...body }
 		return this.referralService.create(payload)
 	}
 
@@ -71,14 +79,17 @@ export class ReferralController {
 		description: `when data not found`,
 	})
 	@ApiBearerAuth()
+	@UseGuards(AuthGuard('jwt'))
 	@Patch(':id')
 	update(
 		@ClientFrom() clientFrom: string,
+		@Me() owner: string,
 		@Param('id') id: string,
 		@Body() body: ReferralDto
 	) {
 		const payload = {
 			id,
+			owner,
 			clientFrom,
 			...body,
 		}
@@ -97,8 +108,10 @@ export class ReferralController {
 		description: `when data not found`,
 	})
 	@ApiBearerAuth()
+	@UseGuards(AuthGuard('jwt'))
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.referralService.remove(id)
+	remove(@Param('id') id: string, @Me() owner: string) {
+		const payload = { id, owner }
+		return this.referralService.remove(payload)
 	}
 }
