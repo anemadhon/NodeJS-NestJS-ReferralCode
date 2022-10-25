@@ -31,6 +31,9 @@ export class AuthController {
 	}
 
 	@ApiNoContentResponse({ description: `when user logged out successfully` })
+	@ApiBadRequestResponse({
+		description: `when the request wrong or not passed validation`,
+	})
 	@ApiUnauthorizedResponse({ description: `when user unauthenticated` })
 	@ApiBearerAuth()
 	@HttpCode(204)
@@ -38,5 +41,16 @@ export class AuthController {
 	@Post('logout')
 	logout(@Body() payload: LogoutDto) {
 		return this.authService.logout(payload)
+	}
+
+	@ApiOkResponse({ description: `when user request new token successfully` })
+	@ApiBadRequestResponse({
+		description: `when the request wrong or not passed validation`,
+	})
+	@ApiUnauthorizedResponse({ description: `when token expired` })
+	@HttpCode(200)
+	@Post('refresh')
+	refresh(@Body() payload: LogoutDto) {
+		return this.authService.refresh(payload)
 	}
 }

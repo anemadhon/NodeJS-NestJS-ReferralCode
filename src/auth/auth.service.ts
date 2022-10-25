@@ -72,6 +72,30 @@ export class AuthService {
 		return { message: '', result: '' }
 	}
 
+	async refresh(payload: LogoutDto) {
+		const decodedToken = JSON.stringify(this.jwt.decode(payload.refreshToken))
+		const decodedTokenParsed = JSON.parse(decodedToken)
+		const refreshTokenExp = decodedTokenParsed.exp * 1000
+
+		if (refreshTokenExp < Date.now()) {
+			await this.deleteToken(payload.refreshToken)
+
+			throw new UnauthorizedException(
+				'UnauthorizedException - Please Login to Continue'
+			)
+		}
+
+		const token = {
+			type: 'Bearer',
+			accessToken: await this.generateToken(decodedTokenParsed.sub, {
+				expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRE'),
+				secret: this.config.get<string>('JWT_ACCESS_SECRET'),
+			}),
+		}
+
+		return { message: '', result: token }
+	}
+
 	private generateToken(
 		id: string,
 		options: { expiresIn: string; secret: string }
