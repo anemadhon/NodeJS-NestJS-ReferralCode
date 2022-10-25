@@ -44,6 +44,10 @@ export class AuthService {
 		return { message: '', result: token }
 	}
 
+	async logout() {
+		return { message: '', result: '' }
+	}
+
 	private generateToken(
 		id: string,
 		options: { expiresIn: string; secret: string }
