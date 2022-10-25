@@ -10,6 +10,15 @@ $ npm install
 # copy .env.example
 $ cp .env.example .env
 
+# prisma migrate
+$ npx prisma migrate dev
+
+# prisma seed
+$ npm prisma:seed
+
+# swagger docs
+$ {your host}/api/docs
+
 # development
 $ npm run start
 
