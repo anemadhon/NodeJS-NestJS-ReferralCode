@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, UseGuards } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthDto } from './dto/auth.dto'
 import {
@@ -11,6 +11,7 @@ import {
 	ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 import { LogoutDto } from './dto/logout.dto'
+import { AuthGuard } from '@nestjs/passport'
 
 @ApiInternalServerErrorResponse({ description: `when server goes wrong` })
 @ApiTags('auth')
@@ -33,6 +34,7 @@ export class AuthController {
 	@ApiUnauthorizedResponse({ description: `when user unauthenticated` })
 	@ApiBearerAuth()
 	@HttpCode(204)
+	@UseGuards(AuthGuard('jwt'))
 	@Post('logout')
 	logout(@Body() payload: LogoutDto) {
 		return this.authService.logout(payload)

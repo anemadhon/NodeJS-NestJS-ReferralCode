@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException } from '@nestjs/common'
+import {
+	Injectable,
+	ForbiddenException,
+	NotFoundException,
+} from '@nestjs/common'
 import { nanoid } from 'nanoid'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { tryCatchErrorHandling } from 'src/response.filter'
@@ -42,11 +46,17 @@ export class ReferralService {
 	}
 
 	async findOne(id: string) {
+		const referral = await this.prisma.referrals
+			.findUnique({ where: { id } })
+			.catch(error => tryCatchErrorHandling(error))
+
+		if (!referral) {
+			throw new NotFoundException('NotFoundException - Data Not Found')
+		}
+
 		return {
 			message: '',
-			result: await this.prisma.referrals
-				.findUnique({ where: { id } })
-				.catch(error => tryCatchErrorHandling(error)),
+			result: referral,
 		}
 	}
 
